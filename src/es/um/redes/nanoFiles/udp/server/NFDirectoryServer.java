@@ -114,23 +114,23 @@ public class NFDirectoryServer {
 
 			// Analizamos la solicitud y la procesamos
 			if (dataLength > 0) {
-				String messageFromClient = null;
+				String strFromClient = null;
 				/*
 				 * : (Boletín UDP) Construir una cadena a partir de los datos recibidos en el
 				 * buffer de recepción
 				 */
-				messageFromClient = new String(receptionBuffer, 0, packetFromClient.getLength());
+				strFromClient = new String(receptionBuffer, 0, packetFromClient.getLength());
 
 				if (NanoFiles.testMode) { // En modo de prueba (mensajes en "crudo", boletín UDP)
 					System.out.println("[testMode] Contents interpreted as " + dataLength + "-byte String: \""
-							+ messageFromClient + "\"");
+							+ strFromClient + "\"");
 					/*
 					 * TODO: (Boletín UDP) Comprobar que se ha recibido un datagrama con la cadena
 					 * "login" y en ese caso enviar como respuesta un mensaje al cliente con la
 					 * cadena "loginok". Si el mensaje recibido no es "login", se informa del error
 					 * y no se envía ninguna respuesta.
 					 */
-					if (messageFromClient.equals("login")) {
+					if (strFromClient.equals("login")) {
 						String responseToClient = "loginok";
 						byte[] responseBuffer = responseToClient.getBytes();
 						DatagramPacket packetToClient = new DatagramPacket(responseBuffer, responseBuffer.length, clientAddr);
@@ -147,8 +147,14 @@ public class NFDirectoryServer {
 						System.err.println("Directory DISCARDED datagram from " + clientAddr);
 						continue;
 					}
+					//TODO posibles println
+					DirMessage messageFromClient = DirMessage.fromString(strFromClient);
+					DirMessage messageToClient = buildResponseFromRequest(messageFromClient, clientAddr);
+					String strToClient = messageToClient.toString();
+					DatagramPacket packetToSend = new DatagramPacket(strToClient.getBytes(), strToClient.length(), clientAddr);
+					this.socket.send(packetToSend);
 					
-					//CÓDIGO COPIADO DE MARIO
+					/*CÓDIGO COPIADO DE MARIO
 					System.out.println("quiero mandarte la respuesta pero el mensaje es "+messageFromClient);
                     if(messageFromClient.contains("login")) {
                         String nickname = messageFromClient.split("&")[1];
@@ -171,7 +177,7 @@ public class NFDirectoryServer {
                         DatagramPacket packetToSend = new DatagramPacket(strResponse.getBytes(), strResponse.length(), clientAddr);
                         this.socket.send(packetToSend);
                         System.out.println();
-                    }
+                    } */
 					
 					/* EL CÓDIGO DEFECTUOSO QUE HICE YO EMPIEZA AQUÍ
 					if(messageFromClient.startsWith("login&")) {
@@ -236,6 +242,18 @@ public class NFDirectoryServer {
 			 * el nick y su sessionKey asociada. NOTA: Puedes usar random.nextInt(1000)
 			 * para generar la session key
 			 */
+			response = new DirMessage(DirMessageOps.OPERATION_LOGINRESPONSE);
+			if (nicks.containsKey(username)) {
+				System.out.println("El usuario " + username + " ya está registrado, melón");
+				response.setKey(DirMessage.LOGIN_FAILED_KEY);
+			} else {
+				int key = random.nextInt(1001);
+				nicks.put(username, key);
+				response.setKey(key);
+			}
+			System.out.println("Mensaje LOGIN_RESPONSE:");
+			System.out.println(response.toString());
+			
 			/*
 			 * TODO: Construimos un mensaje de respuesta que indique el éxito/fracaso del
 			 * login y contenga la sessionKey en caso de éxito, y lo devolvemos como

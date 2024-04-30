@@ -9,6 +9,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
 import es.um.redes.nanoFiles.udp.message.DirMessage;
+import es.um.redes.nanoFiles.udp.message.DirMessageOps;
 import es.um.redes.nanoFiles.util.FileInfo;
 
 /**
@@ -212,6 +213,19 @@ public class DirectoryConnector {
 		// TODO: 6.Extraer datos del objeto DirMessage y procesarlos (p.ej., sessionKey)
 		// TODO: 7.Devolver éxito/fracaso de la operación
 
+		DirMessage messageToSend = new DirMessage(DirMessageOps.OPERATION_LOGIN);
+		messageToSend.setNickname(nickname);
+		String strToSend = messageToSend.toString();
+		byte[] messageInBytes = strToSend.getBytes();
+		System.out.println("La solicitud login es: " + strToSend);
+		byte[] messageReceivedInBytes = sendAndReceiveDatagrams(messageInBytes);
+		String strReceived = new String(messageReceivedInBytes);
+		DirMessage messageReceived = DirMessage.fromString(strReceived);
+		System.out.println("Campo operation = " + messageReceived.getOperation());
+		System.out.println("Campo key = " + messageReceived.getKey());
+		if (messageReceived.getKey() != -1) success = true;
+		
+		/* RELIQUIAS DEL PASADO (boletín 3)
 		String message = "login&" + nickname;
 		byte[] messageInBytes = message.getBytes();
 		System.out.println("La solicitud login es: " + message);
@@ -235,6 +249,7 @@ public class DirectoryConnector {
 			System.err.println(e.getLocalizedMessage());
 			success = false;
 		}
+		*/
 		
 		return success;
 	}

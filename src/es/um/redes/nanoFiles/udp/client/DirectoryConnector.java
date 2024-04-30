@@ -219,7 +219,7 @@ public class DirectoryConnector {
 		String messageReceived = new String(messageReceivedInBytes);
 		
 		try {
-			int num = Integer.parseInt(messageReceived.substring(6));
+			int num = Integer.parseInt(messageReceived.substring(8));
 			if (messageReceived.startsWith("loginok&") && 0 <= num && num <= 1000) {
 				success = messageReceived.startsWith("loginok&") && 0 <= num && num <= 1000;
 				sessionKey = num;
@@ -232,6 +232,7 @@ public class DirectoryConnector {
 				//TODO que el mensaje de error no sea un suspenso directo
 			}
 		} catch (Exception e) {
+			System.err.println(e.getLocalizedMessage());
 			success = false;
 		}
 		

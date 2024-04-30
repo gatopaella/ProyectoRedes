@@ -148,6 +148,32 @@ public class NFDirectoryServer {
 						continue;
 					}
 					
+					//CÓDIGO COPIADO DE MARIO
+					System.out.println("quiero mandarte la respuesta pero el mensaje es "+messageFromClient);
+                    if(messageFromClient.contains("login")) {
+                        String nickname = messageFromClient.split("&")[1];
+                        String strResponse = null;
+                        if(this.nicks.containsKey(nickname)) {
+                            strResponse = "login_failed:-1";
+                        }
+                        else {
+                            int num;
+                            do {
+                                num = random.nextInt(1000);
+                            } while (this.nicks.containsValue(num));
+
+                            this.nicks.put(nickname, num);
+                            strResponse = "loginok&"+num;
+                            System.out.println("Te respondo maestro");
+                        }
+
+
+                        DatagramPacket packetToSend = new DatagramPacket(strResponse.getBytes(), strResponse.length(), clientAddr);
+                        this.socket.send(packetToSend);
+                        System.out.println();
+                    }
+					
+					/* EL CÓDIGO DEFECTUOSO QUE HICE YO EMPIEZA AQUÍ
 					if(messageFromClient.startsWith("login&")) {
 						int sessionKey = random.nextInt(1001); // Número aleatorio entre 0 y 1000
 						String responseText = "loginok&" + sessionKey;
@@ -160,6 +186,7 @@ public class NFDirectoryServer {
 							System.err.println(e.getLocalizedMessage());
 						}
 					}
+					Y TERMINA AQUÍ */
 
 					/*
 					 * TODO: Construir String partir de los datos recibidos en el datagrama. A

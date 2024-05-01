@@ -170,8 +170,21 @@ public class DirMessage {
 			sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);
 			break;
 		}
-		case DirMessageOps.OPERATION_LOGINRESPONSE: {
+		case DirMessageOps.OPERATION_LOGINOK: {
 			sb.append(FIELDNAME_KEY + DELIMITER + key + END_LINE);
+			break;
+		}
+		case DirMessageOps.OPERATION_LOGOUT: {
+			sb.append(FIELDNAME_KEY + DELIMITER + key + END_LINE);
+			break;
+		}
+		case DirMessageOps.OPERATION_LOGOUTOK: {
+			break;
+		}
+		case DirMessageOps.OPERATION_INVALIDNICKNAME: {
+			break;
+		}
+		case DirMessageOps.OPERATION_INVALIDKEY: {
 			break;
 		}
 		default:

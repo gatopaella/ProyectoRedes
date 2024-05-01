@@ -222,8 +222,10 @@ public class DirectoryConnector {
 		String strReceived = new String(messageReceivedInBytes);
 		DirMessage messageReceived = DirMessage.fromString(strReceived);
 		System.out.println("Campo operation = " + messageReceived.getOperation());
-		System.out.println("Campo key = " + messageReceived.getKey());
-		if (messageReceived.getKey() != -1) success = true;
+		if (messageReceived.getOperation().equals(DirMessageOps.OPERATION_LOGINOK)) {
+			System.out.println("Campo key = " + messageReceived.getKey());
+			success = true;
+		}
 		
 		/* RELIQUIAS DEL PASADO (boletín 3)
 		String message = "login&" + nickname;
@@ -277,11 +279,43 @@ public class DirectoryConnector {
 	 * @return Verdadero si el directorio eliminó a este usuario exitosamente
 	 */
 	public boolean logoutFromDirectory() {
+		assert (sessionKey == INVALID_SESSION_KEY);
 		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
+		boolean success = false;
+		// TODO: 1.Crear el mensaje a enviar (objeto DirMessage) con atributos adecuados
+		// (operation, etc.) NOTA: Usar como operaciones las constantes definidas en la clase
+		// DirMessageOps
+		// TODO: 2.Convertir el objeto DirMessage a enviar a un string (método toString)
+		
+		// TODO: 3.Crear un datagrama con los bytes en que se codifica la cadena
+		// TODO: 4.Enviar datagrama y recibir una respuesta (sendAndReceiveDatagrams).
+		// TODO: 5.Convertir respuesta recibida en un objeto DirMessage (método
+		// DirMessage.fromString)
+		// TODO: 6.Extraer datos del objeto DirMessage y procesarlos (p.ej., sessionKey)
+		// TODO: 7.Devolver éxito/fracaso de la operación
 
+		DirMessage messageToSend = new DirMessage(DirMessageOps.OPERATION_LOGOUT);
+		messageToSend.setKey(sessionKey);
+		
+		String strToSend = messageToSend.toString();
+		byte[] messageInBytes = messageToSend.toString().getBytes();
+		
+		System.out.println("La solicitud logout es: " + strToSend);
+		
+		byte[] messageReceivedInBytes = sendAndReceiveDatagrams(messageInBytes);
+		
+		String strReceived = new String(messageReceivedInBytes);
+		
+		DirMessage messageReceived = DirMessage.fromString(strReceived);
+		
+		System.out.println("Campo operation = " + messageReceived.getOperation());
+		
+		if (messageReceived.getOperation().equals(DirMessageOps.OPERATION_LOGOUTOK)) {
+			success = true;
+			sessionKey = INVALID_SESSION_KEY; // Cerramos la sesión
+		}
 
-
-		return false;
+		return success;
 	}
 
 	/**

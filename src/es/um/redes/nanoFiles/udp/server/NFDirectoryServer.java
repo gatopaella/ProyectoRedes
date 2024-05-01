@@ -242,16 +242,21 @@ public class NFDirectoryServer {
 			 * el nick y su sessionKey asociada. NOTA: Puedes usar random.nextInt(1000)
 			 * para generar la session key
 			 */
-			response = new DirMessage(DirMessageOps.OPERATION_LOGINRESPONSE);
-			if (nicks.containsKey(username)) {
+			
+			if (sessionKeys.containsValue(username)) {
+				response= new DirMessage(DirMessageOps.OPERATION_INVALIDNICKNAME);
 				System.out.println("El usuario " + username + " ya está registrado, melón");
-				response.setKey(DirMessage.LOGIN_FAILED_KEY);
 			} else {
-				int key = random.nextInt(1001);
-				nicks.put(username, key);
+				response = new DirMessage(DirMessageOps.OPERATION_LOGINOK);
+				int key;
+				do {
+					key = random.nextInt(1001);
+				} while (sessionKeys.containsKey(key));
+				//nicks.put(username, key);
+				sessionKeys.put(key, username);
 				response.setKey(key);
 			}
-			System.out.println("Mensaje LOGIN_RESPONSE:");
+			System.out.println("Mensaje de respuesta:");
 			System.out.println(response.toString());
 			
 			/*
@@ -267,7 +272,18 @@ public class NFDirectoryServer {
 
 			break;
 		}
-
+		case DirMessageOps.OPERATION_LOGOUT: {
+			int key = msg.getKey();
+			
+			if (sessionKeys.containsKey(key)) {
+				response = new DirMessage(DirMessageOps.OPERATION_LOGOUTOK);
+				System.out.println("Cerrando la sesión del usuario " + sessionKeys.get(key));
+				sessionKeys.remove(key);
+			} else {
+				response = new DirMessage(DirMessageOps.OPERATION_INVALIDKEY);
+				System.out.println("La clave " + key + " no está registrada, melón");
+			}
+		}
 		default:
 			System.out.println("Unexpected message operation: \"" + operation + "\"");
 		}

@@ -81,9 +81,7 @@ public class NFControllerLogicDir {
 		 * dar de baja a este usuario. Se debe enviar la clave de sesión para
 		 * identificarse. Devolver éxito/fracaso de la operación.
 		 */
-		boolean result = false;
-
-
+		boolean result = directoryConnector.logoutFromDirectory();
 
 		return result;
 	}

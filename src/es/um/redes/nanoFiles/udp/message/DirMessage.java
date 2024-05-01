@@ -1,11 +1,8 @@
 package es.um.redes.nanoFiles.udp.message;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.LinkedList;
-
-import es.um.redes.nanoFiles.util.FileInfo;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Clase que modela los mensajes del protocolo de comunicación entre pares para
@@ -28,6 +25,8 @@ public class DirMessage {
 	private static final String FIELDNAME_OPERATION = "operation";
 	private static final String FIELDNAME_NICKNAME = "nickname";
 	private static final String FIELDNAME_KEY = "key";
+	private static final String FIELDNAME_USER = "user";
+	private static final String FIELDNAME_ISSERVER = "isServer";
 	/*
 	 * TODO: Definir de manera simbólica los nombres de todos los campos que pueden
 	 * aparecer en los mensajes de este protocolo (formato campo:valor)
@@ -45,12 +44,14 @@ public class DirMessage {
 	 */
 	private String nickname;
 	private int key;
+	private HashMap<String, Boolean> userlist;
 	
 	public static final int LOGIN_FAILED_KEY = -1;
 
 
 	public DirMessage(String op) {
 		operation = op;
+		userlist = new HashMap<String, Boolean>();
 	}
 
 
@@ -76,6 +77,9 @@ public class DirMessage {
 		this.key = key;
 	}
 	
+	public void setUserlist(HashMap<String, Boolean> userlist) {
+		this.userlist = new HashMap<String, Boolean>(userlist);
+	}
 	
 	public String getNickname() {
 
@@ -88,7 +92,10 @@ public class DirMessage {
 		return key;
 	}
 
-
+	public Map<String, Boolean> getUserlist() {
+		return Collections.unmodifiableMap(userlist);
+	}
+	
 
 	/**
 	 * Método que convierte un mensaje codificado como una cadena de caracteres, a
@@ -119,7 +126,7 @@ public class DirMessage {
 			int idx = line.indexOf(DELIMITER); // Posición del delimitador
 			String fieldName = line.substring(0, idx).toLowerCase(); // minúsculas
 			String value = line.substring(idx + 1).trim();
-
+			String user = "INVALID USER";
 			switch (fieldName) {
 			case FIELDNAME_OPERATION: {
 				assert (m == null);
@@ -134,6 +141,15 @@ public class DirMessage {
 				m.setKey(Integer.parseInt(value));
 				break;
 			}
+			case FIELDNAME_USER: {
+				user = value;
+				break;
+			}
+			case FIELDNAME_ISSERVER: {
+				m.userlist.put(user, Boolean.parseBoolean(value));
+				break;
+			}
+			
 
 
 			default:
@@ -181,12 +197,24 @@ public class DirMessage {
 		case DirMessageOps.OPERATION_LOGOUTOK: {
 			break;
 		}
+		case DirMessageOps.OPERATION_GETUSERLIST: {
+			sb.append(FIELDNAME_KEY + DELIMITER + key + END_LINE);
+			break;
+		}
+		case DirMessageOps.OPERATION_SENDUSERLIST: {
+			for(String user : userlist.keySet()) {
+				sb.append(FIELDNAME_USER + DELIMITER + user + END_LINE);
+				sb.append(FIELDNAME_ISSERVER + DELIMITER + userlist.get(user) + END_LINE);
+			}
+			break;
+		}
 		case DirMessageOps.OPERATION_INVALIDNICKNAME: {
 			break;
 		}
 		case DirMessageOps.OPERATION_INVALIDKEY: {
 			break;
 		}
+
 		default:
 			throw new IllegalArgumentException("Unexpected value: " + operation);
 		}

@@ -5,8 +5,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.Map;
 
 import es.um.redes.nanoFiles.udp.message.DirMessage;
 import es.um.redes.nanoFiles.udp.message.DirMessageOps;
@@ -267,7 +267,31 @@ public class DirectoryConnector {
 	public String[] getUserList() {
 		String[] userlist = null;
 		// TODO: Ver TODOs en logIntoDirectory y seguir esquema similar
+		boolean success = false;
+		Map<String, Boolean> userMap;
+		// TODO: 1.Crear el mensaje a enviar (objeto DirMessage) con atributos adecuados
+		// (operation, etc.) NOTA: Usar como operaciones las constantes definidas en la clase
+		// DirMessageOps
+		// TODO: 2.Convertir el objeto DirMessage a enviar a un string (método toString)
+		
+		// TODO: 3.Crear un datagrama con los bytes en que se codifica la cadena
+		// TODO: 4.Enviar datagrama y recibir una respuesta (sendAndReceiveDatagrams).
+		// TODO: 5.Convertir respuesta recibida en un objeto DirMessage (método
+		// DirMessage.fromString)
+		// TODO: 6.Extraer datos del objeto DirMessage y procesarlos (p.ej., sessionKey)
+		// TODO: 7.Devolver éxito/fracaso de la operación
 
+		DirMessage messageToSend = new DirMessage(DirMessageOps.OPERATION_GETUSERLIST);
+		messageToSend.setKey(sessionKey);
+		String strToSend = messageToSend.toString();
+		byte[] messageInBytes = strToSend.getBytes();
+		System.out.println("La solicitud de lista de usuarios es: " + strToSend);
+		byte[] messageReceivedInBytes = sendAndReceiveDatagrams(messageInBytes);
+		String strReceived = new String(messageReceivedInBytes);
+		DirMessage messageReceived = DirMessage.fromString(strReceived);
+		userMap = messageReceived.getUserlist();
+		userlist = userMap.keySet().toArray(userlist);
+		System.out.println("La lista en cuestión, es:" + userlist);
 
 
 		return userlist;

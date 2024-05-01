@@ -284,6 +284,21 @@ public class NFDirectoryServer {
 				System.out.println("La clave " + key + " no está registrada, melón");
 			}
 		}
+		case DirMessageOps.OPERATION_GETUSERLIST: {
+			int key = msg.getKey();
+			if (sessionKeys.containsKey(key)) {
+				response = new DirMessage(DirMessageOps.OPERATION_SENDUSERLIST);
+				HashMap<String, Boolean> userlist = new HashMap<>();
+				for(String user : sessionKeys.values()) {
+					userlist.put(user, false);
+				}
+				response.setUserlist(userlist);
+				System.out.println("Mandando la lista de usuarios" + userlist.values());
+			} else {
+				response = new DirMessage(DirMessageOps.OPERATION_INVALIDKEY);
+				System.out.println("La clave " + key + " no está registrada, melón");
+			}
+		}
 		default:
 			System.out.println("Unexpected message operation: \"" + operation + "\"");
 		}

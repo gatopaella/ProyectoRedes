@@ -8,9 +8,6 @@ public class DirMessageOps {
 	 */
 	public static final String OPERATION_INVALID = "invalid_operation";
 	public static final String OPERATION_LOGIN = "login";
-
-
-
-
+	public static final String OPERATION_LOGINRESPONSE = "loginResponse";
 
 }

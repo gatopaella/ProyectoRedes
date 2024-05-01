@@ -26,6 +26,8 @@ public class DirMessage {
 	 * Nombre del campo que define el tipo de mensaje (primera línea)
 	 */
 	private static final String FIELDNAME_OPERATION = "operation";
+	private static final String FIELDNAME_NICKNAME = "nickname";
+	private static final String FIELDNAME_KEY = "key";
 	/*
 	 * TODO: Definir de manera simbólica los nombres de todos los campos que pueden
 	 * aparecer en los mensajes de este protocolo (formato campo:valor)
@@ -42,8 +44,9 @@ public class DirMessage {
 	 * diferentes mensajes de este protocolo.
 	 */
 	private String nickname;
-
-
+	private int key;
+	
+	public static final int LOGIN_FAILED_KEY = -1;
 
 
 	public DirMessage(String op) {
@@ -69,13 +72,21 @@ public class DirMessage {
 		nickname = nick;
 	}
 
+	public void setKey(int key) {
+		this.key = key;
+	}
+	
+	
 	public String getNickname() {
 
 
 
 		return nickname;
 	}
-
+	
+	public int getKey() {
+		return key;
+	}
 
 
 
@@ -94,6 +105,7 @@ public class DirMessage {
 		 * cada línea el nombre del campo y el valor, usando el delimitador DELIMITER, y
 		 * guardarlo en variables locales.
 		 */
+		
 
 		// System.out.println("DirMessage read from socket:");
 		// System.out.println(message);
@@ -114,8 +126,14 @@ public class DirMessage {
 				m = new DirMessage(value);
 				break;
 			}
-
-
+			case FIELDNAME_NICKNAME: {
+				m.setNickname(value);
+				break;
+			}
+			case FIELDNAME_KEY: {
+				m.setKey(Integer.parseInt(value));
+				break;
+			}
 
 
 			default:
@@ -147,7 +165,18 @@ public class DirMessage {
 		 * concatenar el resto de campos necesarios usando los valores de los atributos
 		 * del objeto.
 		 */
-
+		switch (operation) {
+		case DirMessageOps.OPERATION_LOGIN: { // Si es un mensaje de login
+			sb.append(FIELDNAME_NICKNAME + DELIMITER + nickname + END_LINE);
+			break;
+		}
+		case DirMessageOps.OPERATION_LOGINRESPONSE: {
+			sb.append(FIELDNAME_KEY + DELIMITER + key + END_LINE);
+			break;
+		}
+		default:
+			throw new IllegalArgumentException("Unexpected value: " + operation);
+		}
 
 
 		sb.append(END_LINE); // Marcamos el final del mensaje
